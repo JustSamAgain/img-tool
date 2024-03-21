@@ -1,7 +1,7 @@
 
 img-tool only supports jpg and png at the moment
 
-stb_image library is needed (https://github.com/nothings/stb)(in current form in a folder called "stb_image"), the programm needs "stb_image_resize2.h", "stb_image_write.h" and "stb_image.h"
+stb_image library is needed (https://github.com/nothings/stb) (in current form in a folder called "stb_image"), the programm needs "stb_image_resize2.h", "stb_image_write.h" and "stb_image.h"
 
 read properties: ./to-grey [file-name] p
 transform to jpg: ./to-grey [file-name] to-jpg
