@@ -57,8 +57,6 @@ int main(int argc, char *argv[]){
                     *(pg + 1) = *(p + 3);
                 }
             }
-            unsigned char *p = img;
-            printf("%i, %i, %i, %i\n", *p, *(p+1), *(p+2), *(p+3));
 //---       + if 4 else jpg
             if(strcmp(argv[3], "jpg")==0){   //could implement: [file-name[-.jpg]]2.jpg
                stbi_write_jpg("new_image.jpg", width, height, gray_channels, gray_img, 100);
@@ -71,11 +69,3 @@ int main(int argc, char *argv[]){
             }else return(4);
     }
 }
-
-
-    // for(int i = 0; i<20; i++){
-    //     if(argv[1][i]!='\0'){
-    //     printf("%c", argv[1][i]);
-    //     }else printf("-");
-    // }
-    // printf("\n");
