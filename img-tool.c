@@ -1,5 +1,5 @@
 //list for further features:
-//"./img-tool actions?" prints list of commands
+//cut n-px-rows from top, below, left, right
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,10 +21,28 @@ typedef struct{
 void add_array(int r, int g, int b, num_col *arr, int arr_size);
 
 int main(int argc, char *argv[]){
-    if(argc<=2){
-        printf("img-tool [file-name]  >action< >file-type (if-convert-colors)<\n");
-        return 1;
+    if(argc==2){
+        //manual for using the tool !!extend if implementing further features
+        if(strcmp(argv[1], "actions?")==0){
+            printf("./img-tool [file-name] [action or edit]\n");
+            printf("[actions]:\n");
+            printf("    [p] print properties of image (width, height, channels)\n");
+            printf("    [to-png] convert to png\n");
+            printf("    [to-jpg] convert to jpg\n");
+            printf("    [count-px] count number of px per color\n");
+            printf("[edit]:\n");
+            printf("    [g [filetype]] makes greyscale version of image in given filetype\n");
+            printf("    [b-w [ft]] makes black-and-white version of image\n");
+            printf("[filetype]:\n");
+            printf("    [jpg]\n");
+            printf("    [png]\n");
+            printf("For further questions please go to https://github.com/JustSamAgain/img-tool/issues\n");
+            return 0;
+        }else{
+            printf("./img-tool [file-name] [[>action<]or[>edit< >file-type<]] or ./img-tool actions?\n");
+            return 1;
         }
+    }
 
     int width, height, channels;
     unsigned char *img = stbi_load(argv[1], &width, &height, &channels, 0);
@@ -37,20 +55,24 @@ int main(int argc, char *argv[]){
 
 //"img-tool [file-name] p" (p for properties), "to-png", "to-jpg", "count-px"
     if(argc==3){
+        //print properties of image
         if(*argv[2]=='p'){
             printf("Image has width of %dpx, height of %dpx and %d channels\n", width, height, channels);
             return 0;
         }else if(strcmp(argv[2], "to-png")==0){
+            //make-png
             printf("New name? ");
             char new_name[30];
             scanf("%s", new_name);
             stbi_write_png(strcat(new_name, ".png"), width, height, channels, img, width * channels);
         }else if(strcmp(argv[2], "to-jpg")==0){
+            //make jpg
             printf("New name? ");
             char new_name[30];
             scanf("%s", new_name);
             stbi_write_jpg(strcat(new_name, ".jpg"), width, height, channels, img, 100);
         }else if(strcmp(argv[2], "count-px")==0){
+            //count number of px per color in image
             int array_size = 10;
             num_col colors[array_size]; //still have to work on that
             for(int i=0; i<array_size; i++){
@@ -65,7 +87,8 @@ int main(int argc, char *argv[]){
                 i++;
             }
         }else{
-            printf("./img-tool [file-name] >action< >file-type (if-convert-colors)<");
+            printf("Error: couldn't find [action]\n");
+            printf("./img-tool [file-name] [[>action<]or[>edit< >file-type<]] or ./img-tool actions?\n");
             return(3);
             };
     }
@@ -80,7 +103,7 @@ int main(int argc, char *argv[]){
             unsigned char *new_image = malloc(new_img_size);
             if(new_image == NULL){
                 printf("Unable to allocate memory for the gray image.\n");
-                return(5);
+                return(4);
             }
             //greyscale
             if(*argv[2]=='g'){
@@ -91,9 +114,10 @@ int main(int argc, char *argv[]){
                     }
                 }
             }else{
+            //black-and-white
                 for(unsigned char *p = img, *pg = new_image; p != img + img_size; p+= channels, pg += new_channels){
                     int average = (uint8_t)((*p +(*p + 1) + *(p + 2))/3.0);
-                    if(average>127.5){
+                    if(average>127.5){ //if darker than 127.5
                         *pg = (uint8_t)255;
                     }else{*pg = (uint8_t)0;}
                     if(channels == 4){
@@ -106,24 +130,32 @@ int main(int argc, char *argv[]){
                stbi_write_jpg("new_image.jpg", width, height, new_channels, new_image, 100);
             }else if(strcmp(argv[3], "png")==0){
                 stbi_write_png("new_image.png", width, height, new_channels, new_image, width * new_channels);
+            }else{
+                printf("only supports jpg and png\n");
+                printf("./img-tool [file-name] >edit< >file-type<   or ./img-tool actions?\n");
+                return(5);
             }
             stbi_image_free(img);
             free(new_image);
             return 0;
-            }else return(4);
+            }else{
+                printf("couldn't find [edit]\n");
+                printf("./img-tool [file-name]  [[>action<]or[>edit< >file-type<]] or ./img-tool actions?\n");
+                return(6);
+            }
     }
 }
 
 void add_array(int r, int g, int b, num_col *arr, int arr_size)
 {
     for(int i = 0; i<arr_size; i++){
-        if(
+        if( //in array
             arr[i].defined != '\0' && arr[i].r == r &&
             arr[i].g == g && arr[i].b == b
         ){
             arr[i].num++;
             return;
-        }else if(arr[i].defined == '\0'){
+        }else if(arr[i].defined == '\0'){ //not in array
             arr[i].defined = 1;
             arr[i].r = r;
             arr[i].g = g;
