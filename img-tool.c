@@ -1,5 +1,5 @@
 //list for further features:
-//cut n-px-rows from top, below, left, right
+//cut n-px-rows from top,below, left, right
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,6 +33,7 @@ int main(int argc, char *argv[]){
             printf("[edit]:\n");
             printf("    [g [filetype]] makes greyscale version of image in given filetype\n");
             printf("    [b-w [ft]] makes black-and-white version of image\n");
+            printf("    [cut-below [number of px]] cut number of px from below\n");
             printf("[filetype]:\n");
             printf("    [jpg]\n");
             printf("    [png]\n");
@@ -138,10 +139,33 @@ int main(int argc, char *argv[]){
             stbi_image_free(img);
             free(new_image);
             return 0;
+            }else if(strcmp(argv[2], "cut-below")==0){
+                if(*argv[3]>=height){
+                    printf("You cannot cut more than: Height %d\n", height);
+                    return 6;
+                }
+                int px = atoi(argv[3]);
+                size_t new_img_size = width * (height-px) * channels;
+
+                unsigned char *new_image = malloc(new_img_size);
+
+                for(unsigned char *p = img, *pg=new_image; p!=img+new_img_size; *p++, *pg++){
+                    *pg = (uint8_t)*p;
+                }
+                char new_name[30];
+                printf("New name?: ");
+                scanf("%s", new_name);
+                if(channels==4){
+                    stbi_write_png(strcat(new_name, ".png"), width, (height-px), channels, new_image, width * channels);
+                }else{
+                    stbi_write_jpg(strcat(new_name, ".jpg"), width, (height-px), channels, new_image, 100);
+                }
+                stbi_image_free(img);
+                free(new_image);
             }else{
                 printf("couldn't find [edit]\n");
                 printf("./img-tool [file-name]  [[>action<]or[>edit< >file-type<]] or ./img-tool actions?\n");
-                return(6);
+                return(7);
             }
     }
 }
