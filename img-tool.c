@@ -34,6 +34,7 @@ int main(int argc, char *argv[]){
             printf("    [g [filetype]] makes greyscale version of image in given filetype\n");
             printf("    [b-w [ft]] makes black-and-white version of image\n");
             printf("    [cut-below [number of px]] cut number of px from below\n");
+            printf("    [cut-top [number of px]] cut number of px from top\n");
             printf("[filetype]:\n");
             printf("    [jpg]\n");
             printf("    [png]\n");
@@ -139,19 +140,26 @@ int main(int argc, char *argv[]){
             stbi_image_free(img);
             free(new_image);
             return 0;
-            }else if(strcmp(argv[2], "cut-below")==0){
-                if(*argv[3]>=height){
+        }else if(strcmp(argv[2], "cut-below")==0 || strcmp(argv[2], "cut-top")==0){
+                int px = atoi(argv[3]);
+                if(px>=height){
                     printf("You cannot cut more than: Height %d\n", height);
                     return 6;
                 }
-                int px = atoi(argv[3]);
                 size_t new_img_size = width * (height-px) * channels;
 
                 unsigned char *new_image = malloc(new_img_size);
 
-                for(unsigned char *p = img, *pg=new_image; p!=img+new_img_size; *p++, *pg++){
-                    *pg = (uint8_t)*p;
+                if(strcmp(argv[2], "cut-below")==0){
+                    for(unsigned char *p = img, *pg=new_image; p!=img+new_img_size; *p++, *pg++){
+                        *pg = (uint8_t)*p;
+                    }
+                }else{
+                    for(unsigned char *p = (img+(width*channels*px)), *pg=new_image; p!=img+img_size; *p++, *pg++){
+                        *pg = (uint8_t)*p;
+                    }
                 }
+
                 char new_name[30];
                 printf("New name?: ");
                 scanf("%s", new_name);
@@ -162,6 +170,7 @@ int main(int argc, char *argv[]){
                 }
                 stbi_image_free(img);
                 free(new_image);
+                return 0;
             }else{
                 printf("couldn't find [edit]\n");
                 printf("./img-tool [file-name]  [[>action<]or[>edit< >file-type<]] or ./img-tool actions?\n");
