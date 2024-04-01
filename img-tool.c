@@ -177,7 +177,15 @@ int main(int argc, char *argv[]){
                         *pg = (uint8_t)*p;
                     }
                 }else if(strcmp(argv[2], "cut-left")==0){
-                    printf("cut left!\n");
+                    int ctr = 0;
+                    for(unsigned char *p = img, *pg=new_image; p!=img+img_size; *p++, ctr++){
+                        if((ctr%(width*channels))>=(px*channels)){
+                            *pg=(uint8_t)*p;
+                            *pg ++;
+                        }else{
+                            *p += ((px*channels)-1);
+                        }
+                    }
                 }else{ //cut right
                 int ctr = 0;
                     for(unsigned char *p = img, *pg=new_image; p!=img+img_size; *p++, ctr++){

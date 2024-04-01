@@ -11,6 +11,7 @@ grayscale to png: ./img-tool [file-name] g png <br>
 black and white : ./img-tool [file-name] b-w [jpg/png] <br>
 cut image number of px from below: ./img-tool [file-name] cut-below [number of px]<br>
 cut image from top: ./img-tool [file-name] cut-top [number of px]<br>
+cut image from left: ./img-tool [file-name] cut-left [number of px] <br>
 cut image from right: ./img-tool [file-name] cut-right [number of px] <br>
 
 compiling the c file works with: gcc -std=c17 img-tool.c -o img-tool -lm (on bash with gcc installed)
