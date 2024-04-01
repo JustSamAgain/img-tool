@@ -35,6 +35,8 @@ int main(int argc, char *argv[]){
             printf("    [b-w [ft]] makes black-and-white version of image\n");
             printf("    [cut-below [number of px]] cut number of px from below\n");
             printf("    [cut-top [number of px]] cut number of px from top\n");
+            printf("    [cut-left [number of px]] cut from left side\n");
+            printf("    [cut-right [number of px]] cut from right\n");
             printf("[filetype]:\n");
             printf("    [jpg]\n");
             printf("    [png]\n");
@@ -140,23 +142,51 @@ int main(int argc, char *argv[]){
             stbi_image_free(img);
             free(new_image);
             return 0;
-        }else if(strcmp(argv[2], "cut-below")==0 || strcmp(argv[2], "cut-top")==0){
+        }else if(strcmp(argv[2], "cut-below")==0 || strcmp(argv[2], "cut-top")==0 ||
+        strcmp(argv[2], "cut-left")==0 || strcmp(argv[2], "cut-right")==0){
                 int px = atoi(argv[3]);
-                if(px>=height){
-                    printf("You cannot cut more than: Height %d\n", height);
-                    return 6;
+                size_t new_img_size;
+                int new_width;
+                int new_height;
+                if(strcmp(argv[2], "cut-below")==0 || strcmp(argv[2], "cut-top")==0){
+                    if(px>=height || px<0){
+                        printf("You cannot cut more than: Height %d\n", height);
+                        return 6;
+                    }
+                    new_img_size = width * (height-px) * channels;
+                    new_width = width;
+                    new_height = (height-px);
+                }else{
+                    if(px>=width || px<0){
+                        printf("You cannot cut more than: Width %d\n", width);
+                        return 6;
+                    }
+                    new_img_size = (width-px) * height * channels;
+                    new_width = (width-px);
+                    new_height = height;
                 }
-                size_t new_img_size = width * (height-px) * channels;
-
+                
                 unsigned char *new_image = malloc(new_img_size);
 
                 if(strcmp(argv[2], "cut-below")==0){
                     for(unsigned char *p = img, *pg=new_image; p!=img+new_img_size; *p++, *pg++){
                         *pg = (uint8_t)*p;
                     }
-                }else{
+                }else if(strcmp(argv[2], "cut-top")==0){
                     for(unsigned char *p = (img+(width*channels*px)), *pg=new_image; p!=img+img_size; *p++, *pg++){
                         *pg = (uint8_t)*p;
+                    }
+                }else if(strcmp(argv[2], "cut-left")==0){
+                    printf("cut left!\n");
+                }else{ //cut right
+                int ctr = 0;
+                    for(unsigned char *p = img, *pg=new_image; p!=img+img_size; *p++, ctr++){
+                        if((ctr%(width*channels))<((width-px)*channels)){
+                            *pg=(uint8_t)*p;
+                            *pg ++;
+                        }else{
+                            *p += ((px*channels)-1);
+                        }
                     }
                 }
 
@@ -164,9 +194,9 @@ int main(int argc, char *argv[]){
                 printf("New name?: ");
                 scanf("%s", new_name);
                 if(channels==4){
-                    stbi_write_png(strcat(new_name, ".png"), width, (height-px), channels, new_image, width * channels);
+                    stbi_write_png(strcat(new_name, ".png"), new_width, new_height, channels, new_image, new_width * channels);
                 }else{
-                    stbi_write_jpg(strcat(new_name, ".jpg"), width, (height-px), channels, new_image, 100);
+                    stbi_write_jpg(strcat(new_name, ".jpg"), new_width, new_height, channels, new_image, 100);
                 }
                 stbi_image_free(img);
                 free(new_image);
