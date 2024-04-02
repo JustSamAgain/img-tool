@@ -1,5 +1,4 @@
 //list for further features:
-//cut n-px-rows from top,below, left, right
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,6 +18,8 @@ typedef struct{
 } num_col;
 
 void add_array(int r, int g, int b, num_col *arr, int arr_size);
+void greyscale(unsigned char *img, unsigned char *new_image, size_t img_size, int channels, int new_channels);
+void black_n_white(unsigned char *img, unsigned char *new_image, size_t img_size, int channels, int new_channels);
 
 int main(int argc, char *argv[]){
     if(argc==2){
@@ -82,13 +83,27 @@ int main(int argc, char *argv[]){
             for(int i=0; i<array_size; i++){
                 colors[i].defined='\0';
             }
-            for(unsigned char *p = img; p!=img+img_size; p+= channels){
-                add_array(*p, *(p+1), *(p+2), colors, array_size);
-            }
-            int i;
-            while(colors[i].defined!='\0' && i<array_size){
-                printf("%i : %i : %i counted %i times\n", colors[i].r, colors[i].g, colors[i].b, colors[i].num);
-                i++;
+            if(channels>2){
+                for(unsigned char *p = img; p!=img+img_size; p+= channels){
+                    add_array(*p, *(p+1), *(p+2), colors, array_size);
+                }
+                int i;
+                while(colors[i].defined!='\0' && i<array_size){
+                    printf("%i : %i : %i counted %i times\n", colors[i].r, colors[i].g, colors[i].b, colors[i].num);
+                    i++;
+                }
+            }else if(channels=2){
+                for(unsigned char *p = img; p!=img+img_size; p+= channels){
+                    add_array(*p, *(p+1), '-', colors, array_size);
+                }
+                int i;
+                while(colors[i].defined!='\0' && i<array_size){
+                    printf("%i : %i : %c counted %i times\n", colors[i].r, colors[i].g, colors[i].b, colors[i].num);
+                    i++;
+                }
+            }else{
+                printf("Error: Problem with channels.\n");
+                return 8;
             }
         }else{
             printf("Error: couldn't find [action]\n");
@@ -106,34 +121,25 @@ int main(int argc, char *argv[]){
             
             unsigned char *new_image = malloc(new_img_size);
             if(new_image == NULL){
-                printf("Unable to allocate memory for the gray image.\n");
+                printf("Unable to allocate memory for the image.\n");
                 return(4);
             }
             //greyscale
             if(*argv[2]=='g'){
-                for(unsigned char *p = img, *pg = new_image; p != img + img_size; p+= channels, pg += new_channels){
-                    *pg = (uint8_t)((*p +(*p + 1) + *(p + 2))/3.0);
-                    if(channels == 4){
-                        *(pg + 1) = *(p + 3);
-                    }
-                }
+                greyscale(img, new_image, img_size, channels, new_channels);
             }else{
             //black-and-white
-                for(unsigned char *p = img, *pg = new_image; p != img + img_size; p+= channels, pg += new_channels){
-                    int average = (uint8_t)((*p +(*p + 1) + *(p + 2))/3.0);
-                    if(average>127.5){ //if darker than 127.5
-                        *pg = (uint8_t)255;
-                    }else{*pg = (uint8_t)0;}
-                    if(channels == 4){
-                        *(pg + 1) = *(p + 3);
-                    }
-                }
+                black_n_white(img, new_image, img_size, channels, new_channels);
             }
-            //---       + if 4 else jpg
+            
+            printf("New name? ");
+            char new_name[30];
+            scanf("%s", new_name);
+
             if(strcmp(argv[3], "jpg")==0){   //could implement: [file-name[-.jpg]]2.jpg
-               stbi_write_jpg("new_image.jpg", width, height, new_channels, new_image, 100);
+               stbi_write_jpg(strcat(new_name, ".jpg"), width, height, new_channels, new_image, 100);
             }else if(strcmp(argv[3], "png")==0){
-                stbi_write_png("new_image.png", width, height, new_channels, new_image, width * new_channels);
+                stbi_write_png(strcat(new_name, ".png"), width, height, new_channels, new_image, width * new_channels);
             }else{
                 printf("only supports jpg and png\n");
                 printf("./img-tool [file-name] >edit< >file-type<   or ./img-tool actions?\n");
@@ -235,4 +241,25 @@ void add_array(int r, int g, int b, num_col *arr, int arr_size)
             return;
         }
     }
+}
+
+void greyscale(unsigned char *img, unsigned char *new_image, size_t img_size, int channels, int new_channels){
+    for(unsigned char *p = img, *pg = new_image; p != img + img_size; p+= channels, pg += new_channels){
+                    *pg = (uint8_t)((*p +(*p + 1) + *(p + 2))/3.0);
+                    if(channels == 4){
+                        *(pg + 1) = *(p + 3);
+                    }
+                }
+}
+
+void black_n_white(unsigned char *img, unsigned char *new_image, size_t img_size, int channels, int new_channels){
+    for(unsigned char *p = img, *pg = new_image; p != img + img_size; p+= channels, pg += new_channels){
+                    int average = (uint8_t)((*p +(*p + 1) + *(p + 2))/3.0);
+                    if(average>127.5){ //if darker than 127.5
+                        *pg = (uint8_t)255;
+                    }else{*pg = (uint8_t)0;}
+                    if(channels == 4){
+                        *(pg + 1) = *(p + 3);
+                    }
+                }
 }
