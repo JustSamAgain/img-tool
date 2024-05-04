@@ -38,3 +38,8 @@ export PATH=$PATH:path/of/your/file
 ```
 source ~/.bashrc
 ```
+Now you should be able to access img-tool from the commandline nomatter in which directory you are. Just type "img-tool" and add any command from above. (e.g. "img-tool image.png g jpg")<br>
+
+For any questions don't hesitate to open an issue post
+
+
